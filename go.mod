@@ -1,3 +1,3 @@
-module github.com/next-frmework/nextmvc
+module github.com/next-frmework/apollo
 
 go 1.13
