@@ -1,6 +1,16 @@
 package main
 
+import (
+	"fmt"
+	"github.com/next-frmework/apollo/config"
+)
+
 func main() {
-	a := NewApollo()
-	a.Run()
+	y := config.Yaml{}
+	app, err := y.Parse("apollo-application.yml")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	fmt.Printf("%+v\n", *app)
 }
