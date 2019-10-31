@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/next-frmework/apollo/config"
 	"net/http"
 )
 
 type Apollo struct {
+	ConfigPath string
+	App        *config.Application
 }
 
 func NewApollo() *Apollo {
