@@ -8,6 +8,7 @@ import (
 type FindHelper struct {
 	Root     string
 	FileName string
+	FilePath string
 }
 
 func (fh *FindHelper) DoFind() error {
