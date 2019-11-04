@@ -13,7 +13,7 @@ import (
 type Apollo struct {
 	Filename           string
 	ApplicationConfig  *config.Application
-	RegisteredHandlers map[string]*router.Handler
+	RegisteredHandlers map[string]router.Handler
 }
 
 func NewApollo() *Apollo {
@@ -86,7 +86,7 @@ func (a *Apollo) Run() {
 
 func (a *Apollo) RegisterHandler(name string, handler *router.Handler) {
 	if a.RegisteredHandlers == nil {
-		a.RegisteredHandlers = make(map[string]*router.Handler)
+		a.RegisteredHandlers = make(map[string]router.Handler)
 	}
 
 	a.RegisteredHandlers[name] = handler
