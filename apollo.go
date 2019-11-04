@@ -11,9 +11,9 @@ import (
 )
 
 type Apollo struct {
-	Filename          string
-	ApplicationConfig *config.Application
-	HandlerMap        map[string]*router.Handler
+	Filename           string
+	ApplicationConfig  *config.Application
+	RegisteredHandlers map[string]*router.Handler
 }
 
 func NewApollo() *Apollo {
@@ -27,7 +27,7 @@ func NewApolloWithFilename(filename string) *Apollo {
 }
 
 func (a *Apollo) Run() {
-	if len(a.HandlerMap) == 0 {
+	if len(a.RegisteredHandlers) == 0 {
 		// todo 打印日志
 		return
 	}
@@ -72,7 +72,7 @@ func (a *Apollo) Run() {
 	}
 
 	for _, v := range a.ApplicationConfig.Routers {
-		handler, existed := a.HandlerMap[v.Handler]
+		handler, existed := a.RegisteredHandlers[v.Handler]
 		if !existed {
 			// todo 打印日志
 			return
@@ -85,11 +85,11 @@ func (a *Apollo) Run() {
 }
 
 func (a *Apollo) RegisterHandler(name string, handler *router.Handler) {
-	if a.HandlerMap == nil {
-		a.HandlerMap = make(map[string]*router.Handler)
+	if a.RegisteredHandlers == nil {
+		a.RegisteredHandlers = make(map[string]*router.Handler)
 	}
 
-	a.HandlerMap[name] = handler
+	a.RegisteredHandlers[name] = handler
 }
 
 func (a *Apollo) ServeHTTP(w http.ResponseWriter, r *http.Request) {

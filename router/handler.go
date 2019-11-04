@@ -6,8 +6,9 @@ type Handler interface {
 	Handle(c *Context)
 }
 
-type Entry struct {
-	Key     string
-	Router  *config.Router
-	Handler *Handler
+type HandlerMapping interface {
+	Add(router config.Router, handler Handler)
+}
+
+type HandlerMappingAdapter struct {
 }
