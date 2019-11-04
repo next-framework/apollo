@@ -3,6 +3,7 @@ package apollo
 import (
 	"fmt"
 	"github.com/next-frmework/apollo/config"
+	"github.com/next-frmework/apollo/router"
 	"github.com/next-frmework/apollo/utils"
 	"net/http"
 	"os"
@@ -10,8 +11,9 @@ import (
 )
 
 type Apollo struct {
-	Filename string
-	App      *config.Application
+	Filename          string
+	ApplicationConfig *config.Application
+	HandlerMap        map[string]*router.Handler
 }
 
 func NewApollo() *Apollo {
@@ -25,6 +27,11 @@ func NewApolloWithFilename(filename string) *Apollo {
 }
 
 func (a *Apollo) Run() {
+	if len(a.HandlerMap) == 0 {
+		// todo 打印日志
+		return
+	}
+
 	filename := a.Filename
 	if len(filename) == 0 {
 		path, err := os.Getwd()
@@ -57,9 +64,32 @@ func (a *Apollo) Run() {
 		// todo 打印日志
 		return
 	}
-	a.App = app
+	a.ApplicationConfig = app
+
+	if len(a.ApplicationConfig.Routers) == 0 {
+		// todo 打印日志
+		return
+	}
+
+	for _, v := range a.ApplicationConfig.Routers {
+		handler, existed := a.HandlerMap[v.Handler]
+		if !existed {
+			// todo 打印日志
+			return
+		}
+
+		path := v.Path
+	}
 
 	http.ListenAndServe("127.0.0.1:8080", a)
+}
+
+func (a *Apollo) RegisterHandler(name string, handler *router.Handler) {
+	if a.HandlerMap == nil {
+		a.HandlerMap = make(map[string]*router.Handler)
+	}
+
+	a.HandlerMap[name] = handler
 }
 
 func (a *Apollo) ServeHTTP(w http.ResponseWriter, r *http.Request) {

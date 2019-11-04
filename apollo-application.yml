@@ -2,7 +2,7 @@ name: apollo-application
 servers:
   address: 0.0.0.0
   port: 8080
-request-mappings:
+routers:
   - name: root
     path: /*
     handler: x.Mux
@@ -16,6 +16,6 @@ request-mappings:
       - options
       - trace
   - name: hello
-    path: /hello
+    path: /hello/{userid}
     handler: x.HelloMux
     methods: [get,post]

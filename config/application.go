@@ -1,9 +1,9 @@
 package config
 
 type Application struct {
-	Name            string
-	Server          Server
-	RequestMappings []RequestMapping
+	Name    string
+	Server  Server
+	Routers []Router
 }
 
 type Server struct {
@@ -11,7 +11,7 @@ type Server struct {
 	Port    int
 }
 
-type RequestMapping struct {
+type Router struct {
 	Name    string
 	Path    string
 	Handler string

@@ -15,12 +15,12 @@ type Yaml struct {
 		Address string
 		Port    int
 	}
-	RequestMappings []struct {
+	Routers []struct {
 		Name    string
 		Path    string
 		Handler string
 		Methods []string
-	} `yaml:"request-mappings"`
+	}
 }
 
 func (y *Yaml) Parse(filename string) (*Application, error) {
@@ -39,17 +39,17 @@ func (y *Yaml) Parse(filename string) (*Application, error) {
 
 	app.Server = Server{Address: y.Server.Address, Port: y.Server.Port}
 
-	if len(y.RequestMappings) != 0 {
-		app.RequestMappings = make([]RequestMapping, 0, len(y.RequestMappings))
-		for _, v := range y.RequestMappings {
-			r := RequestMapping{Name: v.Name, Path: v.Path, Handler: v.Handler}
+	if len(y.Routers) != 0 {
+		app.Routers = make([]Router, 0, len(y.Routers))
+		for _, v := range y.Routers {
+			r := Router{Name: v.Name, Path: v.Path, Handler: v.Handler}
 			if len(v.Methods) != 0 {
 				r.Methods = make([]string, 0, len(v.Methods))
 				for _, v1 := range v.Methods {
 					r.Methods = append(r.Methods, v1)
 				}
 			}
-			app.RequestMappings = append(app.RequestMappings, r)
+			app.Routers = append(app.Routers, r)
 		}
 	}
 
