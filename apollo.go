@@ -1,4 +1,4 @@
-package main
+package apollo
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"github.com/next-frmework/apollo/utils"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 type Apollo struct {
@@ -28,11 +29,16 @@ func (a *Apollo) Run() {
 	if len(filename) == 0 {
 		path, err := os.Getwd()
 		if err != nil {
-			fmt.Println(err.Error())
+			// todo 打印日志
 			return
 		}
-		fmt.Printf(path)
-		// todo find apollo-application.* config file
+		filename, err = utils.Find(path, "apollo-application.*", a.match)
+		if len(filename) == 0 || err != nil {
+			// todo 打印日志
+			return
+		}
+
+		a.Filename = filename
 	}
 
 	suffix := utils.GetSuffix(a.Filename)
@@ -48,7 +54,8 @@ func (a *Apollo) Run() {
 
 	app, err := p.Parse(a.Filename)
 	if err != nil {
-		fmt.Println(err.Error())
+		// todo 打印日志
+		return
 	}
 	a.App = app
 
@@ -57,4 +64,12 @@ func (a *Apollo) Run() {
 
 func (a *Apollo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.URL.Path)
+}
+
+func (a *Apollo) match(pattern, filename string) bool {
+	matched, err := filepath.Match(pattern, filename)
+	if err != nil {
+		return false
+	}
+	return matched
 }

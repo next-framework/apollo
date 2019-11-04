@@ -1,8 +1,7 @@
 name: apollo-application
 servers:
-  - name: http1
-    address: 0.0.0.0
-    port: 8080
+  address: 0.0.0.0
+  port: 8080
 request-mappings:
   - name: root
     path: /*

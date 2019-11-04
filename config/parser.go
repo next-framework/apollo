@@ -10,9 +10,8 @@ type Parser interface {
 }
 
 type Yaml struct {
-	Name    string
-	Servers []struct {
-		Name    string
+	Name   string
+	Server struct {
 		Address string
 		Port    int
 	}
@@ -37,13 +36,9 @@ func (y *Yaml) Parse(filename string) (*Application, error) {
 
 	app := &Application{}
 	app.Name = y.Name
-	if len(y.Servers) != 0 {
-		app.Servers = make([]Server, 0, len(y.Servers))
-		for _, v := range y.Servers {
-			s := Server{Name: v.Name, Address: v.Address, Port: v.Port}
-			app.Servers = append(app.Servers, s)
-		}
-	}
+
+	app.Server = Server{Address: y.Server.Address, Port: y.Server.Port}
+
 	if len(y.RequestMappings) != 0 {
 		app.RequestMappings = make([]RequestMapping, 0, len(y.RequestMappings))
 		for _, v := range y.RequestMappings {

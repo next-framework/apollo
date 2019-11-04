@@ -2,12 +2,11 @@ package config
 
 type Application struct {
 	Name            string
-	Servers         []Server
+	Server          Server
 	RequestMappings []RequestMapping
 }
 
 type Server struct {
-	Name    string
 	Address string
 	Port    int
 }
