@@ -11,18 +11,19 @@ import (
 )
 
 type Apollo struct {
-	Filename           string
-	ApplicationConfig  *config.Application
-	RegisteredHandlers map[string]router.Handler
+	Filename             string
+	ApplicationConfig    *config.Application
+	RegisteredHandlers   map[string]router.Handler
+	HandlerRouterMapping router.HandlerRouterMapping
 }
 
 func NewApollo() *Apollo {
-	a := &Apollo{}
+	a := &Apollo{RegisteredHandlers: make(map[string]router.Handler), HandlerRouterMapping: new(router.DefaultHandlerRouterMapping)}
 	return a
 }
 
 func NewApolloWithFilename(filename string) *Apollo {
-	a := &Apollo{Filename: filename}
+	a := &Apollo{Filename: filename, RegisteredHandlers: make(map[string]router.Handler), HandlerRouterMapping: new(router.DefaultHandlerRouterMapping)}
 	return a
 }
 
@@ -71,6 +72,10 @@ func (a *Apollo) Run() {
 		return
 	}
 
+	if a.HandlerRouterMapping == nil {
+		a.HandlerRouterMapping = new(router.DefaultHandlerRouterMapping)
+	}
+
 	for _, v := range a.ApplicationConfig.Routers {
 		handler, existed := a.RegisteredHandlers[v.Handler]
 		if !existed {
@@ -78,7 +83,7 @@ func (a *Apollo) Run() {
 			return
 		}
 
-		path := v.Path
+		a.HandlerRouterMapping.Add(v, handler)
 	}
 
 	http.ListenAndServe("127.0.0.1:8080", a)
