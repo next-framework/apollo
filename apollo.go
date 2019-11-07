@@ -1,7 +1,6 @@
 package apollo
 
 import (
-	"fmt"
 	"github.com/next-frmework/apollo/config"
 	"github.com/next-frmework/apollo/router"
 	"github.com/next-frmework/apollo/utils"
@@ -83,13 +82,13 @@ func (a *Apollo) Run() {
 			return
 		}
 
-		a.HandlerRouterMapping.Add(v, handler)
+		a.HandlerRouterMapping.Add(&v, handler)
 	}
 
 	http.ListenAndServe("127.0.0.1:8080", a)
 }
 
-func (a *Apollo) RegisterHandler(name string, handler *router.Handler) {
+func (a *Apollo) RegisterHandler(name string, handler router.Handler) {
 	if a.RegisteredHandlers == nil {
 		a.RegisteredHandlers = make(map[string]router.Handler)
 	}
@@ -98,7 +97,13 @@ func (a *Apollo) RegisterHandler(name string, handler *router.Handler) {
 }
 
 func (a *Apollo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.URL.Path)
+	h, c, err := a.HandlerRouterMapping.Resolve(r)
+	if err != nil {
+		// todo 添加日志，并且根据不同的错误产生不同的响应信息
+		return
+	}
+
+	h.Handle(c)
 }
 
 func (a *Apollo) match(pattern, filename string) bool {

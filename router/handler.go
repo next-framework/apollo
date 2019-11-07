@@ -3,6 +3,8 @@ package router
 import (
 	"github.com/next-frmework/apollo/config"
 	"net/http"
+	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -27,10 +29,15 @@ type HandlerRouterMapping interface {
 }
 
 type DefaultHandlerRouterMapping struct {
-	// todo 构建一个用于url匹配的语法树
+	Paths    []string
 	Handlers map[string]Handler
 	Routers  map[string]*config.Router
+	pMap     map[string]void
 }
+
+type void struct{}
+
+var member void
 
 func (hrm *DefaultHandlerRouterMapping) Add(router *config.Router, handler Handler) {
 	methods := router.Methods
@@ -41,11 +48,20 @@ func (hrm *DefaultHandlerRouterMapping) Add(router *config.Router, handler Handl
 	if hrm.Routers == nil {
 		hrm.Routers = make(map[string]*config.Router)
 	}
+	if hrm.pMap == nil {
+		hrm.pMap = make(map[string]void)
+	}
 	for _, v := range methods {
-		key := buildRouterKey(router.Handler, strings.ToLower(v))
+		path := filepath.Clean(router.Path)
+		key := buildRouterKey(path, strings.ToLower(v))
 		hrm.Routers[key] = router
 
-		// todo 构建一个用于url匹配的语法树
+		_, existed := hrm.pMap[path]
+		if !existed {
+			hrm.pMap[path] = member
+			hrm.Paths = append(hrm.Paths, path)
+			sort.Sort(sort.Reverse(sort.StringSlice(hrm.Paths)))
+		}
 	}
 
 	if hrm.Handlers == nil {
