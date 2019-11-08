@@ -1,4 +1,4 @@
-package config
+package apollo
 
 type Application struct {
 	Name    string

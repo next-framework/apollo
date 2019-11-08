@@ -1,4 +1,4 @@
-package config
+package apollo
 
 import (
 	"gopkg.in/yaml.v2"

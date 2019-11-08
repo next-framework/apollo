@@ -1,5 +1,5 @@
 name: apollo-application
-servers:
+server:
   address: 0.0.0.0
   port: 8080
 routers:

@@ -1,28 +1,27 @@
 package apollo
 
 import (
-	"github.com/next-frmework/apollo/config"
-	"github.com/next-frmework/apollo/router"
 	"github.com/next-frmework/apollo/utils"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 type Apollo struct {
 	Filename             string
-	ApplicationConfig    *config.Application
-	RegisteredHandlers   map[string]router.Handler
-	HandlerRouterMapping router.HandlerRouterMapping
+	ApplicationConfig    *Application
+	RegisteredHandlers   map[string]Handler
+	HandlerRouterMapping HandlerRouterMapping
 }
 
 func NewApollo() *Apollo {
-	a := &Apollo{RegisteredHandlers: make(map[string]router.Handler), HandlerRouterMapping: new(router.DefaultHandlerRouterMapping)}
+	a := &Apollo{RegisteredHandlers: make(map[string]Handler), HandlerRouterMapping: new(DefaultHandlerRouterMapping)}
 	return a
 }
 
 func NewApolloWithFilename(filename string) *Apollo {
-	a := &Apollo{Filename: filename, RegisteredHandlers: make(map[string]router.Handler), HandlerRouterMapping: new(router.DefaultHandlerRouterMapping)}
+	a := &Apollo{Filename: filename, RegisteredHandlers: make(map[string]Handler), HandlerRouterMapping: new(DefaultHandlerRouterMapping)}
 	return a
 }
 
@@ -49,12 +48,12 @@ func (a *Apollo) Run() {
 	}
 
 	suffix := utils.GetSuffix(a.Filename)
-	var p config.Parser
+	var p Parser
 	switch {
 	case suffix == ".yml" || suffix == ".yaml":
-		p = &config.Yaml{}
+		p = &Yaml{}
 	case suffix == ".toml":
-		p = &config.Toml{}
+		p = &Toml{}
 	default:
 		return
 	}
@@ -72,7 +71,7 @@ func (a *Apollo) Run() {
 	}
 
 	if a.HandlerRouterMapping == nil {
-		a.HandlerRouterMapping = new(router.DefaultHandlerRouterMapping)
+		a.HandlerRouterMapping = new(DefaultHandlerRouterMapping)
 	}
 
 	for _, v := range a.ApplicationConfig.Routers {
@@ -85,24 +84,28 @@ func (a *Apollo) Run() {
 		a.HandlerRouterMapping.Add(&v, handler)
 	}
 
-	http.ListenAndServe("127.0.0.1:8080", a)
+	server := a.ApplicationConfig.Server
+	ipAndPort := server.Address + ":" + strconv.Itoa(server.Port)
+
+	http.ListenAndServe(ipAndPort, a)
 }
 
-func (a *Apollo) RegisterHandler(name string, handler router.Handler) {
+func (a *Apollo) RegisterHandler(name string, handler Handler) {
 	if a.RegisteredHandlers == nil {
-		a.RegisteredHandlers = make(map[string]router.Handler)
+		a.RegisteredHandlers = make(map[string]Handler)
 	}
 
 	a.RegisteredHandlers[name] = handler
 }
 
 func (a *Apollo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h, c, err := a.HandlerRouterMapping.Resolve(r)
-	if err != nil {
+	h := a.HandlerRouterMapping.Resolve(r)
+	if h == nil {
 		// todo 添加日志，并且根据不同的错误产生不同的响应信息
 		return
 	}
 
+	c := &Context{Response: w, Request: r, Apollo: a}
 	h.Handle(c)
 }
 
