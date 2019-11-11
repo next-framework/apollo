@@ -99,13 +99,12 @@ func (a *Apollo) RegisterHandler(name string, handler Handler) {
 }
 
 func (a *Apollo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h := a.HandlerRouterMapping.Resolve(r)
-	if h == nil {
+	h, c, err := a.HandlerRouterMapping.Resolve(a, w, r)
+	if err != nil {
 		// todo 添加日志，并且根据不同的错误产生不同的响应信息
 		return
 	}
 
-	c := &Context{Response: w, Request: r, Apollo: a}
 	h.Handle(c)
 }
 

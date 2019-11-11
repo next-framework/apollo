@@ -1,6 +1,7 @@
 package apollo
 
 import (
+	"errors"
 	"net/http"
 	"path/filepath"
 	"regexp"
@@ -25,7 +26,7 @@ type Handler interface {
 
 type HandlerRouterMapping interface {
 	Add(router *Router, handler Handler)
-	Resolve(r *http.Request) Handler
+	Resolve(a *Apollo, w http.ResponseWriter, r *http.Request) (Handler, *Context, error)
 }
 
 type DefaultHandlerRouterMapping struct {
@@ -73,9 +74,9 @@ func (hrm *DefaultHandlerRouterMapping) Add(router *Router, handler Handler) {
 	hrm.Handlers[router.Handler] = handler
 }
 
-func (hrm *DefaultHandlerRouterMapping) Resolve(r *http.Request) Handler {
+func (hrm *DefaultHandlerRouterMapping) Resolve(a *Apollo, w http.ResponseWriter, r *http.Request) (Handler, *Context, error) {
 	if len(hrm.patterns) == 0 {
-		return nil
+		return nil, nil, errors.New("no router path found")
 	}
 
 	path := r.URL.Path
@@ -85,17 +86,17 @@ func (hrm *DefaultHandlerRouterMapping) Resolve(r *http.Request) Handler {
 			key := buildRouterKey(pattern, method)
 			router, existed := hrm.Routers[key]
 			if !existed {
-				return nil
+				return nil, nil, errors.New("no router existed")
 			}
 			handler, existed := hrm.Handlers[router.Handler]
 			if !existed {
-				return nil
+				return nil, nil, errors.New("no handler existed")
 			}
-			return handler
+			return handler, &Context{Response: w, Request: r, Apollo: a}, nil
 		}
 	}
 
-	return nil
+	return nil, nil, errors.New("default error")
 }
 
 func getAllMethods() []string {
