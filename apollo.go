@@ -81,7 +81,8 @@ func (a *Apollo) Run() {
 			return
 		}
 
-		a.HandlerRouterMapping.Add(&v, handler)
+		r := v
+		a.HandlerRouterMapping.Add(&r, handler)
 	}
 
 	server := a.ApplicationConfig.Server
