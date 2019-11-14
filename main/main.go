@@ -9,10 +9,40 @@ import (
 )
 
 type Config struct {
+	Name  string `yaml:"name"`
+	Hello Hello  `yaml:"hello"`
+}
+
+func (c *Config) GetName() string {
+	return c.Name
+}
+
+func (c *Config) GetHello() ReadOnlyHello {
+	return c.Hello
+}
+
+type Hello struct {
 	Name string `yaml:"name"`
 }
 
+func (h *Hello) GetName() string {
+	return h.Name
+}
+
+type ReadOnlyConfig interface {
+	GetName() string
+	GetHello() ReadOnlyHello
+}
+
+type ReadOnlyHello interface {
+	GetName() string
+}
+
 type TestMap map[string]string
+
+func (t *TestMap) test() {
+	*t = TestMap{}
+}
 
 func main() {
 	src, err := ioutil.ReadFile("main/config.yaml")
@@ -27,6 +57,9 @@ func main() {
 		return
 	}
 
+	r := c.GetHello()
+	fmt.Printf("%+v\n", r)
+
 	fmt.Printf("%+v", c)
 
 	fmt.Println(filepath.Clean("../"))
@@ -36,6 +69,8 @@ func main() {
 
 	t := TestMap{}
 	t["a"] = "1"
+
+	t.test()
 
 	m1 := apollo.Storage{}
 	m1.Put("a", 1)
