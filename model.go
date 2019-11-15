@@ -2,6 +2,10 @@ package apollo
 
 import "net/http"
 
+type PathVariables struct {
+	Storage
+}
+
 type Model interface {
 	ResponseWriter() http.ResponseWriter
 
@@ -12,4 +16,8 @@ type Model interface {
 	ResetRequest(r *http.Request)
 
 	PathVariables() PathVariables
+
+	Attributes() Storage
+
+	Context() Context
 }

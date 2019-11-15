@@ -9,33 +9,35 @@ import (
 )
 
 type Config struct {
-	Name  string `yaml:"name"`
+	User  string `yaml:"user"`
 	Hello Hello  `yaml:"hello"`
+	Attrs apollo.Storage
 }
 
-func (c *Config) GetName() string {
-	return c.Name
+func (c Config) GetUser() string {
+	return c.User
 }
 
-func (c *Config) GetHello() ReadOnlyHello {
+func (c Config) GetHello() Hello {
+	fmt.Printf("%p\n", &c.Hello)
 	return c.Hello
 }
 
 type Hello struct {
-	Name string `yaml:"name"`
+	To string `yaml:"to"`
 }
 
-func (h *Hello) GetName() string {
-	return h.Name
+func (h Hello) GetTo() string {
+	return h.To
 }
 
 type ReadOnlyConfig interface {
-	GetName() string
-	GetHello() ReadOnlyHello
+	GetUser() string
+	GetHello() Hello
 }
 
 type ReadOnlyHello interface {
-	GetName() string
+	GetTo() string
 }
 
 type TestMap map[string]string
@@ -45,6 +47,14 @@ func (t *TestMap) test() {
 }
 
 func main() {
+	f, err1 := filepath.Abs("config.yaml")
+	if err1 != nil {
+		fmt.Println(err1.Error())
+	}
+	fmt.Println(f)
+
+	fmt.Println(filepath.Match("app*.*", "app.c"))
+
 	src, err := ioutil.ReadFile("main/config.yaml")
 	if err != nil {
 		fmt.Println(err.Error())
@@ -57,10 +67,40 @@ func main() {
 		return
 	}
 
+	fmt.Printf("%p\n", &c.Hello)
+
+	oo := c.Hello
+	fmt.Printf("%p\n", &oo)
+	oo.To = "A"
+
+	fmt.Println(c.Hello.To)
+
+	ooo := &c.Hello
+	fmt.Printf("%p\n", ooo)
+	ooo.To = "B"
+	fmt.Println(c.Hello.To)
+
 	r := c.GetHello()
+	fmt.Printf("%p\n", &r)
+
 	fmt.Printf("%+v\n", r)
 
-	fmt.Printf("%+v", c)
+	fmt.Printf("%#v\n", c)
+
+	fmt.Printf("c.Attrs=====%p\n", &c.Attrs)
+
+	a := c.Attrs
+	if a == nil {
+		c.Attrs = apollo.Storage{}
+		a = c.Attrs
+		fmt.Printf("c.Attrs=====%p\n", &c.Attrs)
+	}
+	a.Put("a", 1)
+
+	fmt.Println(a["a"].IntDefault(-1))
+	fmt.Println(c.Attrs["a"].IntDefault(-1))
+
+	fmt.Printf("&a=====%p\n", &(a))
 
 	fmt.Println(filepath.Clean("../"))
 

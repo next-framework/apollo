@@ -7,9 +7,9 @@ import (
 )
 
 type Configuration struct {
-	Name    string           `yaml:"name" toml:"name"`
-	Server  ReadOnlyServer   `yaml:"server" toml:"server"`
-	Routers []ReadOnlyRouter `yaml:"routers" toml:"routers"`
+	Name    string   `yaml:"name" toml:"name"`
+	Server  Server   `yaml:"server" toml:"server"`
+	Routers []Router `yaml:"routers" toml:"routers"`
 }
 
 type Server struct {
@@ -26,20 +26,20 @@ type Router struct {
 
 type ReadOnlyConfiguration interface {
 	GetName() string
-	GetServer() ReadOnlyServer
-	GetRouters() []ReadOnlyRouter
+	GetServer() Server
+	GetRouters() []Router
 }
 
 func (c Configuration) GetName() string {
 	return c.Name
 }
 
-func (c Configuration) GetServer() ReadOnlyServer {
+func (c Configuration) GetServer() Server {
 	return c.Server
 }
 
-func (c Configuration) GetRouters() []ReadOnlyRouter {
-	return c.Routers
+func (c Configuration) GetRouters() []Router {
+	return nil
 }
 
 type ReadOnlyServer interface {
